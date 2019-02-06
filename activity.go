@@ -184,7 +184,7 @@ type resolverWrapper struct {
 }
 
 func (w *resolverWrapper) Resolve(toResolve string, scope olddata.Scope) (value interface{}, err error) {
-	return w.resolver.Resolve(toResolve, &legacyScopeWrapper{})
+	return w.resolver.Resolve(toResolve, &legacyScopeWrapper{scope})
 }
 
 type legacyScopeWrapper struct {
@@ -194,7 +194,11 @@ type legacyScopeWrapper struct {
 func (w *legacyScopeWrapper) GetValue(name string) (value interface{}, exists bool) {
 
 	if attr, exists := w.s.GetAttr(name); exists {
-		return attr.Value(), true
+		if olddata.TypeComplexObject == attr.Type() {
+			return attr.Value().(*olddata.ComplexObject).Value, true
+		} else {
+			return attr.Value(), true
+		}
 	}
 
 	return nil, false
@@ -211,11 +215,21 @@ type scopeWrapper struct {
 
 func (w *scopeWrapper) GetAttr(name string) (attr *olddata.Attribute, exists bool) {
 	if val, exists := w.s.GetValue(name); exists {
+		switch t := val.(type) {
+		case *data.ComplexObject, *olddata.ComplexObject:
+			attr, err := olddata.NewAttribute(name, olddata.TypeComplexObject, t)
+			if err != nil {
+				return nil, false
+			}
+			return attr, true
+		}
+
 		attr, err := olddata.NewAttribute(name, olddata.TypeAny, val)
 		if err != nil {
 			return nil, false
 		}
 		return attr, true
+
 	}
 
 	return nil, false
