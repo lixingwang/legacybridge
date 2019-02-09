@@ -215,9 +215,8 @@ type scopeWrapper struct {
 
 func (w *scopeWrapper) GetAttr(name string) (attr *olddata.Attribute, exists bool) {
 	if val, exists := w.s.GetValue(name); exists {
-		switch t := val.(type) {
-		case *data.ComplexObject, *olddata.ComplexObject:
-			attr, err := olddata.NewAttribute(name, olddata.TypeComplexObject, t)
+		if data.IsComplexObjectType(val) {
+			attr, err := olddata.NewAttribute(name, olddata.TypeComplexObject, ToOldComplexObject(val))
 			if err != nil {
 				return nil, false
 			}

@@ -2,7 +2,6 @@ package legacybridge
 
 import (
 	"context"
-
 	olddata "github.com/TIBCOSoftware/flogo-lib/core/data"
 	oldtrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/project-flogo/core/data"
@@ -171,7 +170,15 @@ func (w *wrapperHandlerInf) GetSetting(setting string) (interface{}, bool) {
 }
 
 func (w *wrapperHandlerInf) GetOutput() map[string]interface{} {
-	return nil
+	outputs := w.handler.Outputs()
+	if len(outputs) > 0 {
+		for name, value := range outputs {
+			if data.IsComplexObjectType(value) {
+				outputs[name] = ToOldComplexObject(value)
+			}
+		}
+	}
+	return outputs
 }
 
 func (w *wrapperHandlerInf) GetStringSetting(setting string) string {
