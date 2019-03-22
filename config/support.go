@@ -5,6 +5,7 @@ import (
 	"github.com/project-flogo/core/data"
 	"github.com/project-flogo/core/data/schema"
 	"github.com/project-flogo/legacybridge"
+	"github.com/project-flogo/legacybridge/config/legacyshcema"
 
 	legacyData "github.com/TIBCOSoftware/flogo-lib/core/data"
 )
@@ -40,28 +41,10 @@ func ConvertLegacyAttr(legacyAttr *legacyData.Attribute) (*data.Attribute, error
 
 			if cVal.Metadata != "" {
 				//has schema
-				def := &schema.Def{Type: "json", Value: cVal.Metadata}
-				newSchema = &legacySchema{def}
+				newSchema = legacyshcema.NewLegacySchema(cVal.Metadata)
 			}
 		}
 	}
 
 	return data.NewAttributeWithSchema(legacyAttr.Name(), newType, newVal, newSchema), nil
-}
-
-//To make sure json.marshal can serialize
-type legacySchema struct {
-	*schema.Def
-}
-
-func (s *legacySchema) Type() string {
-	return s.Def.Type
-}
-
-func (s *legacySchema) Value() string {
-	return s.Def.Value
-}
-
-func (*legacySchema) Validate(data interface{}) error {
-	return nil
 }

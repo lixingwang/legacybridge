@@ -2,13 +2,13 @@ package legacybridge
 
 import (
 	"context"
+	"github.com/project-flogo/legacybridge/config/legacyshcema"
 
 	legacyData "github.com/TIBCOSoftware/flogo-lib/core/data"
 	legacyTrigger "github.com/TIBCOSoftware/flogo-lib/core/trigger"
 
 	"github.com/project-flogo/core/data"
 	"github.com/project-flogo/core/data/coerce"
-	"github.com/project-flogo/core/data/schema"
 	"github.com/project-flogo/core/support"
 	"github.com/project-flogo/core/trigger"
 )
@@ -68,7 +68,7 @@ func (w *triggerFactoryWrapper) New(config *trigger.Config) (trg trigger.Trigger
 		for name, sche := range hConfig.OutputSchemas {
 			attr, ok := w.lTrigger.Metadata().Output[name]
 			if ok && attr.Type() == legacyData.TypeComplexObject {
-				s, err := schema.FindOrCreate(sche)
+				s, err := legacyshcema.FindAndCreateLegacySchema(sche)
 				if err != nil {
 					return nil, err
 				}
